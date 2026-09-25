@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Скачивает с Modrinth игровой jar Kotlin for Forge.
-# Аргументы: <каталог> <версия KFF>
+# Скачивает с Modrinth игровые jar Kotlin for Forge и Sodium.
+# Аргументы: <каталог> <версия KFF> <версия Sodium>
 set -euo pipefail
 
 OUT_DIR="${1:?destination directory}"
 KFF_VERSION="${2:?kotlin-for-forge version_number}"
+SODIUM_VERSION="${3:?sodium version_number}"
 USER_AGENT="${MODRINTH_USER_AGENT:-Nergan/cull-less-leaves-for-neoforge (https://github.com/Nergan/cull-less-leaves-for-neoforge)}"
 
 mkdir -p "${OUT_DIR}"
@@ -35,3 +36,4 @@ fetch_modrinth() {
 }
 
 fetch_modrinth "kotlin-for-forge" "${KFF_VERSION}"
+fetch_modrinth "sodium" "${SODIUM_VERSION}"

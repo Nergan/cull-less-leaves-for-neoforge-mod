@@ -1,4 +1,4 @@
-package com.culllessleaves.mod.mixin;
+package com.culllessleaves.mod;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

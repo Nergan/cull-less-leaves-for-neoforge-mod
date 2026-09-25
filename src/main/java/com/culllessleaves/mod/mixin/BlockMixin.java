@@ -1,5 +1,6 @@
 package com.culllessleaves.mod.mixin;
 
+import com.culllessleaves.mod.Cullable;
 import com.culllessleaves.mod.LeafCulling;
 import com.culllessleaves.mod.config.CullSettings;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;

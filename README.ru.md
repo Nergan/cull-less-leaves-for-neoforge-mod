@@ -16,8 +16,9 @@ Jar публикуются в [GitHub Releases](https://github.com/Nergan/cull-l
 
 | Файл | Обязателен | Что это |
 | --- | --- | --- |
-| `culllessleaves-1.4.2.jar` | Да | этот мод |
+| `culllessleaves-1.4.3.jar` | Да | этот мод |
 | `kotlinforforge-5.8.0-all.jar` | Да | [Kotlin for Forge](https://modrinth.com/mod/kotlin-for-forge) |
+| `sodium-neoforge-0.6.13+mc1.21.1.jar` | Нет | [Sodium](https://modrinth.com/mod/sodium). Подойдёт и более новая сборка NeoForge 1.21.1 |
 
 Сборку релиза делает workflow: он собирает мод и скачивает соседний jar с Modrinth. SHA-256 GitHub показывает рядом с файлом на странице релиза. `*-sources.jar` в `mods` класть не нужно.
 

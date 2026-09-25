@@ -16,8 +16,9 @@ Download these files and put them in the `mods` folder:
 
 | File | Required | What it is |
 | --- | --- | --- |
-| `culllessleaves-1.4.2.jar` | Yes | this mod |
+| `culllessleaves-1.4.3.jar` | Yes | this mod |
 | `kotlinforforge-5.8.0-all.jar` | Yes | [Kotlin for Forge](https://modrinth.com/mod/kotlin-for-forge) |
+| `sodium-neoforge-0.6.13+mc1.21.1.jar` | No | [Sodium](https://modrinth.com/mod/sodium). Any newer NeoForge 1.21.1 build works too |
 
 The release workflow builds the mod and fetches the companion jar from Modrinth. GitHub shows a SHA-256 digest next to each file on the release page. Do not install `*-sources.jar`.
 

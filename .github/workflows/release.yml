@@ -32,8 +32,10 @@ jobs:
           set -euo pipefail
           mod_version="$(grep -E '^mod_version=' gradle.properties | cut -d= -f2- | tr -d '\r')"
           kff_version="$(grep -E '^kff_version=' gradle.properties | cut -d= -f2- | tr -d '\r')"
+          sodium_modrinth_version="$(grep -E '^sodium_modrinth_version=' gradle.properties | cut -d= -f2- | tr -d '\r')"
           echo "mod_version=${mod_version}" >> "$GITHUB_OUTPUT"
           echo "kff_version=${kff_version}" >> "$GITHUB_OUTPUT"
+          echo "sodium_modrinth_version=${sodium_modrinth_version}" >> "$GITHUB_OUTPUT"
           echo "mod_version=${mod_version}" >> "$GITHUB_ENV"
 
       - name: Check tag matches mod_version
@@ -91,8 +93,10 @@ jobs:
           chmod +x .github/scripts/fetch-companion-jars.sh
           .github/scripts/fetch-companion-jars.sh \
             release-assets \
-            "${{ steps.versions.outputs.kff_version }}"
+            "${{ steps.versions.outputs.kff_version }}" \
+            "${{ steps.versions.outputs.sodium_modrinth_version }}"
           find release-assets -name 'kotlinforforge-*.jar' | grep -q .
+          find release-assets -name 'sodium-neoforge-*.jar' | grep -q .
           ls -lh release-assets
 
       - name: Remove stale GitHub Release assets
@@ -126,15 +130,17 @@ jobs:
           files: |
             release-assets/culllessleaves-*.jar
             release-assets/kotlinforforge-*.jar
+            release-assets/sodium-neoforge-*.jar
           body: |
-            Minecraft **1.21.1** / NeoForge. Put the jars you need into the `mods` folder. This mod is client-side.
+            Minecraft **1.21.1** / NeoForge. Client-side only. Put the jars you need into the `mods` folder.
 
             | File | Required | Source | License |
             | --- | --- | --- | --- |
             | `culllessleaves-${{ steps.versions.outputs.mod_version }}.jar` | Yes | this mod | LGPL-3.0-only, port of [Cull Less Leaves](https://github.com/isXander/CullLessLeaves) by isXander |
             | `kotlinforforge-${{ steps.versions.outputs.kff_version }}-all.jar` | Yes | [Kotlin for Forge](https://modrinth.com/mod/kotlin-for-forge) | LGPL-2.1 |
+            | `sodium-neoforge-*.jar` | No | [Sodium](https://modrinth.com/mod/sodium) | Polyform Shield 1.0.0 |
 
-            Sodium 0.6.13 or newer for NeoForge 1.21.1 is optional and is not bundled here. Install it from [Modrinth](https://modrinth.com/mod/sodium) (Polyform Shield 1.0.0) if you use Sodium. Do not install `*-sources.jar`. Companion jars are official Modrinth builds. GitHub shows a SHA-256 digest next to each uploaded file.
+            Sodium is optional. The file in this release is `0.6.13+mc1.21.1`; any newer NeoForge 1.21.1 build, including 0.8.x, also works. Skip it if Sodium is already installed. Do not install `*-sources.jar`. Companion jars are official Modrinth builds. GitHub shows a SHA-256 digest next to each uploaded file.
 
       - name: Check Modrinth token
         env:
@@ -161,6 +167,8 @@ jobs:
             Minecraft 1.21.1 / NeoForge. Cull Less Leaves ${{ steps.versions.outputs.mod_version }}.
           loaders: |
             neoforge
+          environment: |
+            client
           game-versions: |
             1.21.1
           java: |
