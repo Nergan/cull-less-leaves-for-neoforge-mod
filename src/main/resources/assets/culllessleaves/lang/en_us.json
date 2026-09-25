@@ -1,0 +1,7 @@
+{
+  "culllessleaves.configuration.culling": "Leaf culling",
+  "culllessleaves.configuration.culling.enabled": "Enabled",
+  "culllessleaves.configuration.culling.depth": "Depth",
+  "culllessleaves.configuration.culling.random_rejection": "Random rejection",
+  "culllessleaves.configuration.culling.fast_mangrove_roots": "Fast mangrove roots"
+}

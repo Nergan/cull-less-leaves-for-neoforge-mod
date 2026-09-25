@@ -1,0 +1,53 @@
+# Значения вида ${...} подставляются Gradle-задачей generateModMetadata
+# из gradle.properties (см. build.gradle.kts).
+
+modLoader = "javafml"
+loaderVersion = "${loader_version_range}"
+
+license = "${mod_license}"
+issueTrackerURL = "https://github.com/Nergan/cull-less-leaves-for-neoforge/issues"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+logoFile = "logo.png"
+logoBlur = false
+displayURL = "https://modrinth.com/project/cull-less-leaves-for-neoforge"
+authors = "${mod_authors}"
+description = '''
+${mod_description}
+
+Убирает внутренние слои листвы и оставляет внешние. Порт Cull Less Leaves от isXander на NeoForge.
+'''
+
+[[mixins]]
+config = "${mod_id}.mixins.json"
+
+[[dependencies.${mod_id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "[${neo_version},)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+modId = "kotlinforforge"
+type = "required"
+versionRange = "${kff_version_range}"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+modId = "sodium"
+type = "optional"
+versionRange = "${sodium_version_range}"
+ordering = "AFTER"
+side = "CLIENT"

@@ -1,0 +1,7 @@
+{
+  "culllessleaves.configuration.culling": "Отсечение листвы",
+  "culllessleaves.configuration.culling.enabled": "Включено",
+  "culllessleaves.configuration.culling.depth": "Глубина",
+  "culllessleaves.configuration.culling.random_rejection": "Случайный отсев",
+  "culllessleaves.configuration.culling.fast_mangrove_roots": "Быстрые корни мангра"
+}
