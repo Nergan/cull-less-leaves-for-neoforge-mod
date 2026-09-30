@@ -38,6 +38,19 @@ jobs:
             visibility="public"
           fi
 
+          # Name and path diverge after a GitLab rename: the title can already be
+          # the new name while the URL slug stays on the old path.
+          find_existing_path() {
+            local search_code
+            search_code="$(curl -sS -o /tmp/gitlab-search.json -w "%{http_code}" --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" --get --data-urlencode "search=${REPO_NAME}" --data "owned=true" --data "simple=true" "https://gitlab.com/api/v4/projects")"
+            if [ "${search_code}" != "200" ]; then
+              echo "GitLab project search failed with HTTP ${search_code}." >&2
+              python3 -c 'import pathlib; print(pathlib.Path("/tmp/gitlab-search.json").read_text(encoding="utf-8", errors="replace")[:2000])' >&2
+              return 1
+            fi
+            python3 -c 'import json,os,sys; name=os.environ["REPO_NAME"]; rows=json.load(open("/tmp/gitlab-search.json",encoding="utf-8")); matches=[p for p in (rows if isinstance(rows,list) else []) if str(p.get("path_with_namespace","")).startswith("naragan/") and (p.get("name")==name or p.get("path")==name)]; print(matches[0]["path"]) if len(matches)==1 else print("several GitLab projects match this repository name", file=sys.stderr) if len(matches)>1 else None; sys.exit(0 if len(matches)==1 else 2 if len(matches)>1 else 1)'
+          }
+
           encoded="$(python3 -c 'import os, urllib.parse; print(urllib.parse.quote("naragan/" + os.environ["REPO_NAME"], safe=""))')"
           # /users returns the account id. Project creation needs the personal namespace id, which is a different number.
           namespace_code="$(curl -sS -o /tmp/gitlab-namespace.json -w "%{http_code}" --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" "https://gitlab.com/api/v4/namespaces/naragan")"
@@ -48,22 +61,37 @@ jobs:
             exit 1
           fi
 
+          gitlab_path="${REPO_NAME}"
           lookup_code="$(curl -sS -o /tmp/gitlab-project.json -w "%{http_code}" --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" "https://gitlab.com/api/v4/projects/${encoded}")"
-          if [ "${lookup_code}" = "404" ]; then
-            create_code="$(curl -sS -o /tmp/gitlab-create.json -w "%{http_code}" --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" --data-urlencode "name=${REPO_NAME}" --data-urlencode "path=${REPO_NAME}" --data-urlencode "namespace_id=${namespace_id}" --data-urlencode "visibility=${visibility}" --data "initialize_with_readme=false" "https://gitlab.com/api/v4/projects")"
-            if [ "${create_code}" != "201" ]; then
-              echo "GitLab project create failed with HTTP ${create_code}."
-              python3 -c 'import pathlib; print(pathlib.Path("/tmp/gitlab-create.json").read_text(encoding="utf-8", errors="replace")[:2000])'
-              exit 1
-            fi
-            echo "Created GitLab project naragan/${REPO_NAME} (${visibility})."
-          elif [ "${lookup_code}" != "200" ]; then
+          if [ "${lookup_code}" = "200" ]; then
+            echo "GitLab project naragan/${REPO_NAME} already exists."
+          elif [ "${lookup_code}" != "404" ]; then
             echo "GitLab project lookup failed with HTTP ${lookup_code}."
             python3 -c 'import pathlib; print(pathlib.Path("/tmp/gitlab-project.json").read_text(encoding="utf-8", errors="replace")[:2000])'
             exit 1
           else
-            echo "GitLab project naragan/${REPO_NAME} already exists."
+            set +e
+            existing="$(find_existing_path)"
+            find_status=$?
+            set -e
+            if [ "${find_status}" = "0" ]; then
+              gitlab_path="${existing}"
+              echo "GitLab project ${REPO_NAME} already exists at naragan/${gitlab_path}."
+            elif [ "${find_status}" = "2" ]; then
+              exit 1
+            else
+              create_code="$(curl -sS -o /tmp/gitlab-create.json -w "%{http_code}" --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" --data-urlencode "name=${REPO_NAME}" --data-urlencode "path=${REPO_NAME}" --data-urlencode "namespace_id=${namespace_id}" --data-urlencode "visibility=${visibility}" --data "initialize_with_readme=false" "https://gitlab.com/api/v4/projects")"
+              if [ "${create_code}" != "201" ]; then
+                echo "GitLab project create failed with HTTP ${create_code}."
+                python3 -c 'import pathlib; print(pathlib.Path("/tmp/gitlab-create.json").read_text(encoding="utf-8", errors="replace")[:2000])'
+                exit 1
+              fi
+              echo "Created GitLab project naragan/${REPO_NAME} (${visibility})."
+            fi
           fi
+
+          export GITLAB_PATH="${gitlab_path}"
+          encoded="$(python3 -c 'import os, urllib.parse; print(urllib.parse.quote("naragan/" + os.environ["GITLAB_PATH"], safe=""))')"
 
           python3 -c 'open("/tmp/git-askpass.sh","w",encoding="utf-8").write("#!/bin/sh\ncase \"$1\" in\n  *Username*) printf \"%s\\n\" \"oauth2\" ;;\n  *) printf \"%s\\n\" \"$GITLAB_TOKEN\" ;;\nesac\n")'
           chmod 700 /tmp/git-askpass.sh
@@ -71,9 +99,9 @@ jobs:
           export GIT_ASKPASS=/tmp/git-askpass.sh
           export GIT_TERMINAL_PROMPT=0
           git remote remove gitlab 2>/dev/null || true
-          git remote add gitlab "https://gitlab.com/naragan/${REPO_NAME}.git"
+          git remote add gitlab "https://gitlab.com/naragan/${gitlab_path}.git"
           git push --prune gitlab "+refs/heads/*:refs/heads/*" "+refs/tags/*:refs/tags/*"
           if ! curl -sS --fail --request PUT --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" --data-urlencode "default_branch=${DEFAULT_BRANCH}" "https://gitlab.com/api/v4/projects/${encoded}" >/tmp/gitlab-default.json; then
             echo "Could not set the default branch. The repository was still mirrored."
           fi
-          echo "Mirrored naragan/${REPO_NAME}."
+          echo "Mirrored naragan/${gitlab_path}."
