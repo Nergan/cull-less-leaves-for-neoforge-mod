@@ -4,7 +4,7 @@
 
 ![icon](ico.png)
 
-A **Minecraft 1.21.1** NeoForge port of [Cull Less Leaves](https://modrinth.com/mod/cull-less-leaves) by isXander. Written in Kotlin with [Kotlin for Forge](https://modrinth.com/mod/kotlin-for-forge).
+A **Minecraft 1.21.1** NeoForge port of [Cull Less Leaves](https://modrinth.com/mod/cull-less-leaves) by isXander. Written in Kotlin with [Kotlin for Forge](https://modrinth.com/mod/kotlin-for-forge). The Fabric version is isXander's original mod. This repository does not build a second Fabric jar.
 
 The config screen is available in English and Russian.
 
@@ -16,7 +16,7 @@ Download these files and put them in the `mods` folder:
 
 | File | Required | What it is |
 | --- | --- | --- |
-| `culllessleaves-1.4.3.jar` | Yes | this mod |
+| `culllessleaves-neoforge-1.21.1-1.4.3.jar` | Yes | this mod |
 | `kotlinforforge-5.8.0-all.jar` | Yes | [Kotlin for Forge](https://modrinth.com/mod/kotlin-for-forge) |
 | `sodium-neoforge-0.6.13+mc1.21.1.jar` | No | [Sodium](https://modrinth.com/mod/sodium). Any newer NeoForge 1.21.1 build works too |
 
