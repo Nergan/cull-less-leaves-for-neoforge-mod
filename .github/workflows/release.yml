@@ -49,16 +49,6 @@ jobs:
             exit 1
           fi
 
-      - name: Point version tag at this commit
-        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
-        run: |
-          set -euo pipefail
-          tag="v${{ steps.versions.outputs.mod_version }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -f "${tag}" "${GITHUB_SHA}"
-          git push -f origin "refs/tags/${tag}"
-
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -99,48 +89,32 @@ jobs:
           find release-assets -name 'sodium-neoforge-*.jar' | grep -q .
           ls -lh release-assets
 
-      - name: Remove stale GitHub Release assets
+      - name: Publish split GitHub releases
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LEGACY_TAG: v${{ steps.versions.outputs.mod_version }}
         run: |
           set -euo pipefail
-          tag="v${{ steps.versions.outputs.mod_version }}"
-          if ! gh release view "${tag}" >/dev/null 2>&1; then
-            echo "No existing release ${tag}"
-            exit 0
-          fi
-          mapfile -t existing < <(gh release view "${tag}" --json assets --jq '.assets[].name')
-          for name in "${existing[@]}"; do
-            if [[ ! -f "release-assets/${name}" ]]; then
-              echo "Deleting stale asset ${name}"
-              gh release delete-asset "${tag}" "${name}" --yes
-            fi
-          done
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          shopt -s nullglob
+          rm -rf release-split
+          dir="release-split/minecraft-1.21.1-neoforge"
+          mkdir -p "${dir}"
+          printf '%s\n' "cull less leaves for minecraft 1.21.1 neoforge" > "${dir}/title.txt"
+          cat > "${dir}/body.md" <<'EOF'
+          Minecraft **1.21.1** / NeoForge. Client-side only. Put the jars you need into the `mods` folder.
 
-      - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ steps.versions.outputs.mod_version }}
-          name: Cull Less Leaves ${{ steps.versions.outputs.mod_version }}
-          target_commitish: ${{ github.sha }}
-          make_latest: true
-          overwrite_files: true
-          generate_release_notes: true
-          fail_on_unmatched_files: true
-          files: |
-            release-assets/culllessleaves-*.jar
-            release-assets/kotlinforforge-*.jar
-            release-assets/sodium-neoforge-*.jar
-          body: |
-            Minecraft **1.21.1** / NeoForge. Client-side only. Put the jars you need into the `mods` folder.
+          | File | Required | Source | License |
+          | --- | --- | --- | --- |
+          | `culllessleaves-neoforge-1.21.1-${{ steps.versions.outputs.mod_version }}.jar` | Yes | this mod | LGPL-3.0-only, port of [Cull Less Leaves](https://github.com/isXander/CullLessLeaves) by isXander |
+          | `kotlinforforge-${{ steps.versions.outputs.kff_version }}-all.jar` | Yes | [Kotlin for Forge](https://modrinth.com/mod/kotlin-for-forge) | LGPL-2.1 |
+          | `sodium-neoforge-*.jar` | No | [Sodium](https://modrinth.com/mod/sodium) | Polyform Shield 1.0.0 |
 
-            | File | Required | Source | License |
-            | --- | --- | --- | --- |
-            | `culllessleaves-neoforge-1.21.1-${{ steps.versions.outputs.mod_version }}.jar` | Yes | this mod | LGPL-3.0-only, port of [Cull Less Leaves](https://github.com/isXander/CullLessLeaves) by isXander |
-            | `kotlinforforge-${{ steps.versions.outputs.kff_version }}-all.jar` | Yes | [Kotlin for Forge](https://modrinth.com/mod/kotlin-for-forge) | LGPL-2.1 |
-            | `sodium-neoforge-*.jar` | No | [Sodium](https://modrinth.com/mod/sodium) | Polyform Shield 1.0.0 |
-
-            Sodium is optional. The file in this release is `0.6.13+mc1.21.1`; any newer NeoForge 1.21.1 build, including 0.8.x, also works. Skip it if Sodium is already installed. Do not install `*-sources.jar`. Companion jars are official Modrinth builds. GitHub shows a SHA-256 digest next to each uploaded file.
+          Sodium is optional. The file in this release is `0.6.13+mc1.21.1`; any newer NeoForge 1.21.1 build, including 0.8.x, also works. Skip it if Sodium is already installed. Do not install `*-sources.jar`. Companion jars are official Modrinth builds. GitHub shows a SHA-256 digest next to each uploaded file. `all-jars.zip` contains every jar on this page.
+          EOF
+          cp -v release-assets/culllessleaves-*.jar release-assets/kotlinforforge-*.jar release-assets/sodium-neoforge-*.jar "${dir}/"
+          python3 .github/scripts/publish-split-releases.py release-split
 
       - name: Check Modrinth token
         id: modrinth_token

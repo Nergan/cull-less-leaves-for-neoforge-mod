@@ -10,7 +10,7 @@
 
 ## Загрузки
 
-Jar публикуются в [GitHub Releases](https://github.com/Nergan/cull-less-leaves-for-neoforge/releases/latest) и на [Modrinth](https://modrinth.com/project/cull-less-leaves-for-neoforge). Пуш в `main` обновляет файлы релиза текущей версии.
+Jar публикуются в [GitHub Releases](https://github.com/Nergan/cull-less-leaves-for-neoforge/releases/latest) и на [Modrinth](https://modrinth.com/project/cull-less-leaves-for-neoforge). Пуш в `main` обновляет страницу GitHub Release для Minecraft 1.21.1 NeoForge. На странице есть `all-jars.zip`.
 
 Скачайте эти файлы и положите их в папку `mods`:
 

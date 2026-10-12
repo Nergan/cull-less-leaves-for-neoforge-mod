@@ -10,7 +10,7 @@ The config screen is available in English and Russian.
 
 ## Downloads
 
-Jars are published to [GitHub Releases](https://github.com/Nergan/cull-less-leaves-for-neoforge/releases/latest) and [Modrinth](https://modrinth.com/project/cull-less-leaves-for-neoforge). A push to `main` updates the files on the current version’s release.
+Jars are published to [GitHub Releases](https://github.com/Nergan/cull-less-leaves-for-neoforge/releases/latest) and [Modrinth](https://modrinth.com/project/cull-less-leaves-for-neoforge). A push to `main` updates the GitHub Release page for Minecraft 1.21.1 NeoForge. The page includes `all-jars.zip`.
 
 Download these files and put them in the `mods` folder:
 
